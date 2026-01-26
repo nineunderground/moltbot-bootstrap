@@ -46,7 +46,7 @@ if [ ! -f "$CONFIG_FILE" ] || [ -n "$CLAWDBOT_REGENERATE_CONFIG" ]; then
   "gateway": {
     "port": ${CLAWDBOT_GATEWAY_PORT:-4001},
     "mode": "local",
-    "bind": "0.0.0.0",
+    "bind": "all",
     "auth": {
       "mode": "token",
       "token": "$GATEWAY_TOKEN"
