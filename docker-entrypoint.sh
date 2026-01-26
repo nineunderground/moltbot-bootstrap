@@ -46,7 +46,7 @@ if [ ! -f "$CONFIG_FILE" ] || [ -n "$CLAWDBOT_REGENERATE_CONFIG" ]; then
   "gateway": {
     "port": ${CLAWDBOT_GATEWAY_PORT:-4001},
     "mode": "local",
-    "bind": "all",
+    "bind": "lan",
     "auth": {
       "mode": "token",
       "token": "$GATEWAY_TOKEN"
@@ -101,6 +101,14 @@ if [ -f "/config/clawdbot.json" ]; then
     echo "Using mounted config from /config/clawdbot.json"
     cp /config/clawdbot.json "$CONFIG_FILE"
 fi
+
+# Always show config content for debugging
+echo ""
+echo "=== CURRENT CONFIG ==="
+cat "$CONFIG_FILE"
+echo ""
+echo "=== END CONFIG ==="
+echo ""
 
 # Show startup info
 echo ""
