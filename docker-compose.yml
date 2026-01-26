@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  clawdbot:
+    build: .
+    container_name: clawdbot-gateway
+    restart: unless-stopped
+    ports:
+      - "${CLAWDBOT_PORT:-4001}:${CLAWDBOT_PORT:-4001}"
+    environment:
+      # Required
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      
+      # Gateway settings
+      - CLAWDBOT_GATEWAY_PORT=${CLAWDBOT_PORT:-4001}
+      - CLAWDBOT_GATEWAY_TOKEN=${CLAWDBOT_GATEWAY_TOKEN:-}
+      
+      # Optional: Telegram
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      
+      # Optional: Regenerate config on startup
+      - CLAWDBOT_REGENERATE_CONFIG=${CLAWDBOT_REGENERATE_CONFIG:-}
+    volumes:
+      # Persist workspace and state
+      - clawdbot-data:/root/clawd
+      - clawdbot-config:/root/.clawdbot
+      
+      # Optional: Mount custom config
+      # - ./config:/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${CLAWDBOT_PORT:-4001}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  clawdbot-data:
+  clawdbot-config:
