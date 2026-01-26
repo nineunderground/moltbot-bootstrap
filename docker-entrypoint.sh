@@ -8,12 +8,25 @@ WORKSPACE="/root/clawd"
 # Ensure directories exist
 mkdir -p "$CONFIG_DIR" "$WORKSPACE/memory"
 
+# Determine if Telegram is enabled
+if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+    TELEGRAM_ENABLED="true"
+else
+    TELEGRAM_ENABLED="false"
+fi
+
 # Generate config if it doesn't exist or if env vars are set
 if [ ! -f "$CONFIG_FILE" ] || [ -n "$CLAWDBOT_REGENERATE_CONFIG" ]; then
     echo "Generating Clawdbot configuration..."
     
     # Use provided token or generate one
-    GATEWAY_TOKEN="${CLAWDBOT_GATEWAY_TOKEN:-$(openssl rand -hex 32)}"
+    if [ -z "$CLAWDBOT_GATEWAY_TOKEN" ]; then
+        GATEWAY_TOKEN=$(openssl rand -hex 32)
+        TOKEN_GENERATED=1
+    else
+        GATEWAY_TOKEN="$CLAWDBOT_GATEWAY_TOKEN"
+        TOKEN_GENERATED=0
+    fi
     
     # Build config
     cat > "$CONFIG_FILE" << EOF
@@ -41,7 +54,7 @@ if [ ! -f "$CONFIG_FILE" ] || [ -n "$CLAWDBOT_REGENERATE_CONFIG" ]; then
   },
   "channels": {
     "telegram": {
-      "enabled": ${TELEGRAM_BOT_TOKEN:+true}${TELEGRAM_BOT_TOKEN:-false},
+      "enabled": $TELEGRAM_ENABLED,
       "botToken": "${TELEGRAM_BOT_TOKEN:-}",
       "dmPolicy": "pairing",
       "groupPolicy": "allowlist",
@@ -51,7 +64,7 @@ if [ ! -f "$CONFIG_FILE" ] || [ -n "$CLAWDBOT_REGENERATE_CONFIG" ]; then
   "plugins": {
     "entries": {
       "telegram": {
-        "enabled": ${TELEGRAM_BOT_TOKEN:+true}${TELEGRAM_BOT_TOKEN:-false}
+        "enabled": $TELEGRAM_ENABLED
       }
     }
   },
@@ -68,7 +81,7 @@ EOF
     echo "Config generated at $CONFIG_FILE"
     
     # Show token if it was auto-generated
-    if [ -z "$CLAWDBOT_GATEWAY_TOKEN" ]; then
+    if [ "$TOKEN_GENERATED" = "1" ]; then
         echo ""
         echo "============================================"
         echo "AUTO-GENERATED GATEWAY TOKEN (save this!):"
@@ -93,7 +106,7 @@ echo ""
 echo "  Port:      ${CLAWDBOT_GATEWAY_PORT:-4001}"
 echo "  Workspace: $WORKSPACE"
 echo "  Config:    $CONFIG_FILE"
-echo "  Telegram:  ${TELEGRAM_BOT_TOKEN:+enabled}${TELEGRAM_BOT_TOKEN:-disabled}"
+echo "  Telegram:  $TELEGRAM_ENABLED"
 echo ""
 
 # Execute the command
