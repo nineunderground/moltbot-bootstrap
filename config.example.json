@@ -1,0 +1,16 @@
+{
+  "workspace": "/root/clawd",
+  
+  "gateway": {
+    "port": 18181,
+    "token": "YOUR_GATEWAY_AUTH_TOKEN_HERE"
+  },
+  
+  "telegram": {
+    "botToken": "123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+  },
+  
+  "anthropic": {
+    "apiKey": "sk-ant-api03-..."
+  }
+}
