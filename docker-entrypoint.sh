@@ -117,7 +117,8 @@ fi
 # Always show config content for debugging
 echo ""
 echo "=== CURRENT CONFIG ==="
-cat "$CONFIG_FILE"
+# Uncomment below for debug purposes
+# cat "$CONFIG_FILE"
 echo ""
 echo "=== END CONFIG ==="
 echo ""
