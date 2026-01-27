@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-CONFIG_DIR="/root/.clawdbot"
-CONFIG_FILE="$CONFIG_DIR/clawdbot.json"
-WORKSPACE="/root/clawd"
+CONFIG_DIR="/root/.moltbot"
+CONFIG_FILE="$CONFIG_DIR/moltbot.json"
+WORKSPACE="/root/molt"
 
 # Ensure directories exist
 mkdir -p "$CONFIG_DIR" "$WORKSPACE/memory"
@@ -16,15 +16,15 @@ else
 fi
 
 # Generate config if it doesn't exist or if env vars are set
-if [ ! -f "$CONFIG_FILE" ] || [ -n "$CLAWDBOT_REGENERATE_CONFIG" ]; then
-    echo "Generating Clawdbot configuration..."
+if [ ! -f "$CONFIG_FILE" ] || [ -n "$MOLTBOT_REGENERATE_CONFIG" ]; then
+    echo "Generating Moltbot configuration..."
     
     # Use provided token or generate one
-    if [ -z "$CLAWDBOT_GATEWAY_TOKEN" ]; then
+    if [ -z "$MOLTBOT_GATEWAY_TOKEN" ]; then
         GATEWAY_TOKEN=$(openssl rand -hex 32)
         TOKEN_GENERATED=1
     else
-        GATEWAY_TOKEN="$CLAWDBOT_GATEWAY_TOKEN"
+        GATEWAY_TOKEN="$MOLTBOT_GATEWAY_TOKEN"
         TOKEN_GENERATED=0
     fi
     
@@ -44,7 +44,7 @@ if [ ! -f "$CONFIG_FILE" ] || [ -n "$CLAWDBOT_REGENERATE_CONFIG" ]; then
     }
   },
   "gateway": {
-    "port": ${CLAWDBOT_GATEWAY_PORT:-4001},
+    "port": ${MOLTBOT_GATEWAY_PORT:-4001},
     "mode": "local",
     "bind": "lan",
     "auth": {
@@ -97,9 +97,9 @@ EOF
 fi
 
 # If a custom config is mounted, use it
-if [ -f "/config/clawdbot.json" ]; then
-    echo "Using mounted config from /config/clawdbot.json"
-    cp /config/clawdbot.json "$CONFIG_FILE"
+if [ -f "/config/moltbot.json" ]; then
+    echo "Using mounted config from /config/moltbot.json"
+    cp /config/moltbot.json "$CONFIG_FILE"
 fi
 
 # Always show config content for debugging
@@ -113,10 +113,10 @@ echo ""
 # Show startup info
 echo ""
 echo "╔═══════════════════════════════════════════╗"
-echo "║         Clawdbot Docker Container         ║"
+echo "║         Moltbot Docker Container         ║"
 echo "╚═══════════════════════════════════════════╝"
 echo ""
-echo "  Port:      ${CLAWDBOT_GATEWAY_PORT:-4001}"
+echo "  Port:      ${MOLTBOT_GATEWAY_PORT:-4001}"
 echo "  Workspace: $WORKSPACE"
 echo "  Config:    $CONFIG_FILE"
 echo "  Telegram:  $TELEGRAM_ENABLED"

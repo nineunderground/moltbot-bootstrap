@@ -1,7 +1,7 @@
 FROM ubuntu:24.04
 
 LABEL maintainer="nineunderground"
-LABEL description="Clawdbot Gateway in Docker"
+LABEL description="Moltbot Gateway in Docker"
 
 # Prevent interactive prompts during install
 ENV DEBIAN_FRONTEND=noninteractive
@@ -20,17 +20,17 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Clawdbot globally
-RUN npm install -g clawdbot@latest
+# Install Moltbot globally
+RUN npm install -g moltbot@latest
 
 # Create directories
-RUN mkdir -p /root/.clawdbot /root/clawd/memory
+RUN mkdir -p /root/.moltbot /root/molt/memory
 
 # Set workspace
-WORKDIR /root/clawd
+WORKDIR /root/molt
 
 # Default port (can be overridden)
-ENV CLAWDBOT_GATEWAY_PORT=4001
+ENV MOLTBOT_GATEWAY_PORT=4001
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
@@ -41,8 +41,8 @@ EXPOSE 4001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:${CLAWDBOT_GATEWAY_PORT}/health || exit 1
+    CMD curl -f http://localhost:${MOLTBOT_GATEWAY_PORT}/health || exit 1
 
 # Run entrypoint
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["clawdbot", "gateway"]
+CMD ["moltbot", "gateway"]

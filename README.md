@@ -1,6 +1,6 @@
-# Clawdbot Bootstrap
+# Moltbot Bootstrap
 
-One-command deployment for [Clawdbot](https://github.com/clawdbot/clawdbot) — on bare metal or Docker.
+One-command deployment for [Moltbot](https://github.com/moltbot/moltbot) — on bare metal or Docker.
 
 ## Docker Deployment (Recommended for NAS/Containers)
 
@@ -8,8 +8,8 @@ One-command deployment for [Clawdbot](https://github.com/clawdbot/clawdbot) — 
 
 ```bash
 # Clone
-git clone https://github.com/nineunderground/clawdbot-bootstrap.git
-cd clawdbot-bootstrap
+git clone https://github.com/nineunderground/moltbot-bootstrap.git
+cd moltbot-bootstrap
 
 # Configure
 cp .env.example .env
@@ -19,25 +19,25 @@ nano .env  # Add your ANTHROPIC_API_KEY
 docker compose up -d
 ```
 
-Your Clawdbot is now running at `http://localhost:4001`
+Your Moltbot is now running at `http://localhost:4001`
 
 ### Docker Build & Run (Manual)
 
 ```bash
 # Build the image
-docker build -t clawdbot .
+docker build -t moltbot .
 
 # Run with environment variables
 docker run -d \
-  --name clawdbot-gateway \
+  --name moltbot-gateway \
   -p 4001:4001 \
   -e ANTHROPIC_API_KEY="sk-ant-..." \
-  -e CLAWDBOT_GATEWAY_PORT=4001 \
+  -e MOLTBOT_GATEWAY_PORT=4001 \
   -e TELEGRAM_BOT_TOKEN="123456789:ABC..." \
-  -v clawdbot-data:/root/clawd \
-  -v clawdbot-config:/root/.clawdbot \
+  -v moltbot-data:/root/molt \
+  -v moltbot-config:/root/.moltbot \
   --restart unless-stopped \
-  clawdbot
+  moltbot
 ```
 
 ### Custom Port
@@ -45,13 +45,13 @@ docker run -d \
 ```bash
 # Use port 5000 instead
 docker run -d \
-  --name clawdbot-gateway \
+  --name moltbot-gateway \
   -p 5000:5000 \
   -e ANTHROPIC_API_KEY="sk-ant-..." \
-  -e CLAWDBOT_GATEWAY_PORT=5000 \
-  -v clawdbot-data:/root/clawd \
-  -v clawdbot-config:/root/.clawdbot \
-  clawdbot
+  -e MOLTBOT_GATEWAY_PORT=5000 \
+  -v moltbot-data:/root/molt \
+  -v moltbot-config:/root/.moltbot \
+  moltbot
 ```
 
 ### Environment Variables
@@ -59,17 +59,17 @@ docker run -d \
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `ANTHROPIC_API_KEY` | Yes | — | Your Anthropic API key |
-| `CLAWDBOT_GATEWAY_PORT` | No | `4001` | Gateway port |
-| `CLAWDBOT_GATEWAY_TOKEN` | No | auto-generated | Auth token for secure access |
+| `MOLTBOT_GATEWAY_PORT` | No | `4001` | Gateway port |
+| `MOLTBOT_GATEWAY_TOKEN` | No | auto-generated | Auth token for secure access |
 | `TELEGRAM_BOT_TOKEN` | No | — | Telegram bot token from @BotFather |
-| `CLAWDBOT_REGENERATE_CONFIG` | No | — | Set to `1` to regenerate config on restart |
+| `MOLTBOT_REGENERATE_CONFIG` | No | — | Set to `1` to regenerate config on restart |
 
 ### Docker Compose
 
 ```yaml
 version: '3.8'
 services:
-  clawdbot:
+  moltbot:
     build: .
     ports:
       - "4001:4001"
@@ -77,33 +77,33 @@ services:
       - ANTHROPIC_API_KEY=sk-ant-...
       - TELEGRAM_BOT_TOKEN=123456789:ABC...
     volumes:
-      - clawdbot-data:/root/clawd
-      - clawdbot-config:/root/.clawdbot
+      - moltbot-data:/root/molt
+      - moltbot-config:/root/.moltbot
     restart: unless-stopped
 
 volumes:
-  clawdbot-data:
-  clawdbot-config:
+  moltbot-data:
+  moltbot-config:
 ```
 
 ### Persistent Data
 
 The container uses two volumes:
-- `clawdbot-data` → `/root/clawd` (workspace, memory, files)
-- `clawdbot-config` → `/root/.clawdbot` (configuration, state)
+- `moltbot-data` → `/root/molt` (workspace, memory, files)
+- `moltbot-config` → `/root/.moltbot` (configuration, state)
 
 ### View Logs
 
 ```bash
-docker logs -f clawdbot-gateway
+docker logs -f moltbot-gateway
 ```
 
 ### First Run Token
 
-On first run, if you don't provide `CLAWDBOT_GATEWAY_TOKEN`, one is auto-generated and printed to the logs:
+On first run, if you don't provide `MOLTBOT_GATEWAY_TOKEN`, one is auto-generated and printed to the logs:
 
 ```bash
-docker logs clawdbot-gateway | grep "GATEWAY TOKEN"
+docker logs moltbot-gateway | grep "GATEWAY TOKEN"
 ```
 
 **Save this token!** You'll need it to access the gateway securely.
@@ -115,8 +115,8 @@ docker logs clawdbot-gateway | grep "GATEWAY TOKEN"
 ### Quick Start
 
 ```bash
-git clone https://github.com/nineunderground/clawdbot-bootstrap.git
-cd clawdbot-bootstrap
+git clone https://github.com/nineunderground/moltbot-bootstrap.git
+cd moltbot-bootstrap
 
 # Create config
 cp config.example.json config.json
@@ -130,7 +130,7 @@ sudo ./deploy.sh config.json
 
 ```json
 {
-  "workspace": "/root/clawd",
+  "workspace": "/root/molt",
   "gateway": {
     "port": 18181,
     "token": "your-secure-token"
@@ -147,9 +147,9 @@ sudo ./deploy.sh config.json
 ### What It Does
 
 1. ✅ Installs Node.js 22 (if needed)
-2. ✅ Installs Clawdbot globally via npm
+2. ✅ Installs Moltbot globally via npm
 3. ✅ Creates workspace directory
-4. ✅ Generates Clawdbot config from your JSON
+4. ✅ Generates Moltbot config from your JSON
 5. ✅ Sets up systemd service with auto-restart
 6. ✅ Starts the gateway
 
@@ -161,31 +161,31 @@ sudo ./deploy.sh config.json
 
 ```bash
 # Status
-docker ps | grep clawdbot
+docker ps | grep moltbot
 
 # Logs
-docker logs -f clawdbot-gateway
+docker logs -f moltbot-gateway
 
 # Restart
-docker restart clawdbot-gateway
+docker restart moltbot-gateway
 
 # Stop
-docker stop clawdbot-gateway
+docker stop moltbot-gateway
 
 # Shell into container
-docker exec -it clawdbot-gateway bash
+docker exec -it moltbot-gateway bash
 
-# Run clawdbot CLI inside container
-docker exec clawdbot-gateway clawdbot status
-docker exec clawdbot-gateway clawdbot pairing list telegram
+# Run moltbot CLI inside container
+docker exec moltbot-gateway moltbot status
+docker exec moltbot-gateway moltbot pairing list telegram
 ```
 
 ### Bare Metal (systemd)
 
 ```bash
-clawdbot status
-journalctl -u clawdbot-gateway -f
-systemctl restart clawdbot-gateway
+moltbot status
+journalctl -u moltbot-gateway -f
+systemctl restart moltbot-gateway
 ```
 
 ---
@@ -196,31 +196,31 @@ After deployment, DM your Telegram bot. You'll receive a pairing code.
 
 **Docker:**
 ```bash
-docker exec clawdbot-gateway clawdbot pairing list telegram
-docker exec clawdbot-gateway clawdbot pairing approve telegram <CODE>
+docker exec moltbot-gateway moltbot pairing list telegram
+docker exec moltbot-gateway moltbot pairing approve telegram <CODE>
 ```
 
 **Bare metal:**
 ```bash
-clawdbot pairing list telegram
-clawdbot pairing approve telegram <CODE>
+moltbot pairing list telegram
+moltbot pairing approve telegram <CODE>
 ```
 
 ---
 
 ## Security
 
-- Always set `CLAWDBOT_GATEWAY_TOKEN` before exposing to the internet
-- Use [clawdbot-nginx-proxy-docker](https://github.com/nineunderground/clawdbot-nginx-proxy-docker) for HTTPS
+- Always set `MOLTBOT_GATEWAY_TOKEN` before exposing to the internet
+- Use [moltbot-nginx-proxy-docker](https://github.com/nineunderground/moltbot-nginx-proxy-docker) for HTTPS
 - Keep your API keys and tokens secure
 
 ---
 
 ## Related
 
-- [Clawdbot](https://github.com/clawdbot/clawdbot) — The AI assistant platform
-- [clawdbot-nginx-proxy-docker](https://github.com/nineunderground/clawdbot-nginx-proxy-docker) — HTTPS reverse proxy
-- [Clawdbot Docs](https://docs.clawd.bot) — Official documentation
+- [Moltbot](https://github.com/moltbot/moltbot) — The AI assistant platform
+- [moltbot-nginx-proxy-docker](https://github.com/nineunderground/moltbot-nginx-proxy-docker) — HTTPS reverse proxy
+- [Moltbot Docs](https://docs.molt.bot) — Official documentation
 
 ## License
 
