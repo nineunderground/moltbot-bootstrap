@@ -59,6 +59,9 @@ if [ ! -f "$CONFIG_FILE" ] || [ -n "$CLAWDBOT_REGENERATE_CONFIG" ]; then
     "auth": {
       "mode": "token",
       "token": "$GATEWAY_TOKEN"
+    },
+    "controlUi": {
+      "allowInsecureAuth": true
     }
   },
   "channels": {
