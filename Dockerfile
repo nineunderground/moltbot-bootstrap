@@ -21,7 +21,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Moltbot globally
-RUN npm install -g moltbot@latest
+RUN npm install -g clawdbot@latest
 
 # Create directories
 RUN mkdir -p /root/.clawdbot /root/clawd/memory
@@ -45,4 +45,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
 
 # Run entrypoint
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["moltbot", "gateway"]
+CMD ["clawdbot", "gateway"]

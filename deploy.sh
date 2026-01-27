@@ -83,14 +83,14 @@ log "Node.js $(node -v) ✓"
 echo "─────────────────────────────────────────────"
 log "Step 2/5: Installing Moltbot..."
 
-if command -v moltbot &> /dev/null; then
-    CURRENT_VERSION=$(moltbot --version 2>/dev/null || echo "unknown")
+if command -v clawdbot &> /dev/null; then
+    CURRENT_VERSION=$(clawdbot --version 2>/dev/null || echo "unknown")
     log "Moltbot already installed: $CURRENT_VERSION"
     warn "Upgrading to latest..."
 fi
 
-npm install -g moltbot@latest
-log "Moltbot $(moltbot --version) installed ✓"
+npm install -g clawdbot@latest
+log "Moltbot $(clawdbot --version) installed ✓"
 
 # Step 3: Create workspace
 echo "─────────────────────────────────────────────"
@@ -197,7 +197,7 @@ After=network.target
 [Service]
 Type=simple
 EnvironmentFile=$ENV_FILE
-ExecStart=/usr/bin/moltbot gateway
+ExecStart=/usr/bin/clawdbot gateway
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal
@@ -241,7 +241,7 @@ if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
 fi
 
 echo "  Commands:"
-echo "    moltbot status          # Check status"
-echo "    moltbot pairing list    # List pending pairings"
+echo "    clawdbot status          # Check status"
+echo "    clawdbot pairing list    # List pending pairings"
 echo "    systemctl restart moltbot-gateway"
 echo ""

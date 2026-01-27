@@ -25,7 +25,7 @@ Your Moltbot is now running at `http://localhost:4001`
 
 ```bash
 # Build the image
-docker build -t moltbot .
+docker build -t moltbot-gateway .
 
 # Run with environment variables
 docker run -d \
@@ -37,7 +37,7 @@ docker run -d \
   -v clawdbot-data:/root/clawd \
   -v clawdbot-config:/root/.clawdbot \
   --restart unless-stopped \
-  moltbot
+  moltbot-gateway
 ```
 
 ### Custom Port
@@ -51,7 +51,7 @@ docker run -d \
   -e CLAWDBOT_GATEWAY_PORT=5000 \
   -v clawdbot-data:/root/clawd \
   -v clawdbot-config:/root/.clawdbot \
-  moltbot
+  moltbot-gateway
 ```
 
 ### Environment Variables
@@ -175,15 +175,15 @@ docker stop moltbot-gateway
 # Shell into container
 docker exec -it moltbot-gateway bash
 
-# Run moltbot CLI inside container
-docker exec moltbot-gateway moltbot status
-docker exec moltbot-gateway moltbot pairing list telegram
+# Run clawdbot CLI inside container
+docker exec moltbot-gateway clawdbot status
+docker exec moltbot-gateway clawdbot pairing list telegram
 ```
 
 ### Bare Metal (systemd)
 
 ```bash
-moltbot status
+clawdbot status
 journalctl -u moltbot-gateway -f
 systemctl restart moltbot-gateway
 ```
@@ -196,14 +196,14 @@ After deployment, DM your Telegram bot. You'll receive a pairing code.
 
 **Docker:**
 ```bash
-docker exec moltbot-gateway moltbot pairing list telegram
-docker exec moltbot-gateway moltbot pairing approve telegram <CODE>
+docker exec moltbot-gateway clawdbot pairing list telegram
+docker exec moltbot-gateway clawdbot pairing approve telegram <CODE>
 ```
 
 **Bare metal:**
 ```bash
-moltbot pairing list telegram
-moltbot pairing approve telegram <CODE>
+clawdbot pairing list telegram
+clawdbot pairing approve telegram <CODE>
 ```
 
 ---
