@@ -25,6 +25,8 @@ services:
       
       # Optional: Mount custom config
       # - ./config:/config:ro
+    networks:
+      - moltbot-net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${CLAWDBOT_PORT:-4001}/health"]
       interval: 30s
@@ -32,8 +34,35 @@ services:
       retries: 3
       start_period: 10s
 
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+    container_name: moltbot-proxy
+    restart: unless-stopped
+    ports:
+      - "${OAUTH2_PROXY_PORT:-4180}:4180"
+    environment:
+      - OAUTH2_PROXY_PROVIDER=github
+      - OAUTH2_PROXY_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - OAUTH2_PROXY_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - OAUTH2_PROXY_COOKIE_SECRET=${OAUTH2_COOKIE_SECRET}
+      - OAUTH2_PROXY_COOKIE_SECURE=true
+      - OAUTH2_PROXY_COOKIE_HTTPONLY=true
+      - OAUTH2_PROXY_COOKIE_SAMESITE=lax
+      - OAUTH2_PROXY_UPSTREAM=http://moltbot-gateway:${CLAWDBOT_PORT:-4001}
+      - OAUTH2_PROXY_HTTP_ADDRESS=0.0.0.0:4180
+      - OAUTH2_PROXY_REDIRECT_URL=${OAUTH2_REDIRECT_URL:-https://bot.vylmio.com/oauth2/callback}
+      - OAUTH2_PROXY_EMAIL_DOMAINS=*
+      - OAUTH2_PROXY_GITHUB_USER=${GITHUB_ALLOWED_USER:-nineunderground}
+      - OAUTH2_PROXY_PASS_HOST_HEADER=true
+      - OAUTH2_PROXY_PASS_ACCESS_TOKEN=true
+      - OAUTH2_PROXY_SET_XAUTHREQUEST=true
     networks:
       - moltbot-net
+    depends_on:
+      moltbot:
+        condition: service_healthy
+    profiles:
+      - oauth2
 
 volumes:
   clawdbot-data:
@@ -41,4 +70,4 @@ volumes:
 
 networks:
   moltbot-net:
-    external: true
+    driver: bridge

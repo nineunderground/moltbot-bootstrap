@@ -21,6 +21,23 @@ docker compose up -d
 
 Your Moltbot is now running at `http://localhost:4001`
 
+### With OAuth2 Proxy (GitHub Login)
+
+To protect your Moltbot behind GitHub authentication:
+
+```bash
+# Configure (fill in GitHub OAuth + cookie secret)
+cp .env.example .env
+nano .env
+
+# Build and run with oauth2 profile
+docker compose --profile oauth2 up -d
+```
+
+Your Moltbot is now at `http://localhost:4180` (behind GitHub login).
+
+See [OAuth2 Proxy Setup](#oauth2-proxy-github-authentication) for full details.
+
 ### Docker Build & Run (Manual)
 
 ```bash
@@ -64,28 +81,6 @@ docker run -d \
 | `TELEGRAM_BOT_TOKEN` | No | — | Telegram bot token from @BotFather |
 | `CLAWDBOT_REGENERATE_CONFIG` | No | — | Set to `1` to regenerate config on restart |
 
-### Docker Compose
-
-```yaml
-version: '3.8'
-services:
-  moltbot:
-    build: .
-    ports:
-      - "4001:4001"
-    environment:
-      - ANTHROPIC_API_KEY=sk-ant-...
-      - TELEGRAM_BOT_TOKEN=123456789:ABC...
-    volumes:
-      - clawdbot-data:/root/clawd
-      - clawdbot-config:/root/.clawdbot
-    restart: unless-stopped
-
-volumes:
-  clawdbot-data:
-  clawdbot-config:
-```
-
 ### Persistent Data
 
 The container uses two volumes:
@@ -107,6 +102,99 @@ docker logs moltbot-gateway | grep "GATEWAY TOKEN"
 ```
 
 **Save this token!** You'll need it to access the gateway securely.
+
+---
+
+## OAuth2 Proxy (GitHub Authentication)
+
+Protect your Moltbot Control UI behind GitHub login using [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/).
+
+### Architecture
+
+```
+Internet → Reverse Proxy (SSL) → oauth2-proxy (:4180) → Moltbot (:4001)
+                                  (GitHub OAuth)          (internal)
+```
+
+### Step 1: Create a GitHub OAuth App
+
+1. Go to **https://github.com/settings/developers**
+2. Click **"New OAuth App"**
+3. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Application name | `Moltbot` |
+| Homepage URL | `https://your-domain.com` |
+| Authorization callback URL | `https://your-domain.com/oauth2/callback` |
+
+4. Click **Register application**
+5. Copy the **Client ID** and generate a **Client Secret**
+
+### Step 2: Configure
+
+Edit your `.env` file:
+
+```bash
+# GitHub OAuth App credentials
+GITHUB_CLIENT_ID=your-client-id
+GITHUB_CLIENT_SECRET=your-client-secret
+
+# Generate cookie secret: openssl rand -hex 16
+OAUTH2_COOKIE_SECRET=your-cookie-secret
+
+# Redirect URL (must match GitHub OAuth App callback URL)
+OAUTH2_REDIRECT_URL=https://your-domain.com/oauth2/callback
+
+# GitHub username allowed to access
+GITHUB_ALLOWED_USER=your-github-username
+```
+
+### Step 3: Run
+
+```bash
+# Start both Moltbot and oauth2-proxy
+docker compose --profile oauth2 up -d
+```
+
+### Step 4: Point your reverse proxy
+
+Update your reverse proxy (FRP/nginx/Caddy) to forward traffic to **port 4180** (oauth2-proxy) instead of 4001:
+
+```
+your-domain.com → Reverse Proxy (SSL) → :4180 (oauth2-proxy) → :4001 (Moltbot)
+```
+
+### OAuth2 Proxy Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `GITHUB_CLIENT_ID` | Yes | — | GitHub OAuth App Client ID |
+| `GITHUB_CLIENT_SECRET` | Yes | — | GitHub OAuth App Client Secret |
+| `OAUTH2_COOKIE_SECRET` | Yes | — | Cookie encryption secret (`openssl rand -hex 16`) |
+| `OAUTH2_REDIRECT_URL` | Yes | — | Must match GitHub callback URL |
+| `GITHUB_ALLOWED_USER` | Yes | — | GitHub username(s) allowed to access |
+| `OAUTH2_PROXY_PORT` | No | `4180` | OAuth2 proxy port |
+
+### Flow
+
+1. User opens `https://your-domain.com`
+2. oauth2-proxy redirects to GitHub login
+3. GitHub authenticates → redirects back
+4. oauth2-proxy verifies the GitHub username → forwards traffic to Moltbot
+5. Moltbot gateway token is still required on first browser visit (`?token=...`)
+
+### Troubleshooting
+
+**404 after login:**
+- Check oauth2-proxy can reach Moltbot: `docker logs moltbot-proxy`
+- Both containers must be on the same Docker network (`moltbot-net`)
+
+**WebSocket issues:**
+- Ensure your reverse proxy passes `Upgrade` and `Connection` headers
+
+**Wrong callback URL:**
+- The `OAUTH2_REDIRECT_URL` must exactly match the callback URL in your GitHub OAuth App settings
 
 ---
 
@@ -147,7 +235,7 @@ sudo ./deploy.sh config.json
 ### What It Does
 
 1. ✅ Installs Node.js 22 (if needed)
-2. ✅ Installs Moltbot globally via npm
+2. ✅ Installs Moltbot globally via official installer
 3. ✅ Creates workspace directory
 4. ✅ Generates Moltbot config from your JSON
 5. ✅ Sets up systemd service with auto-restart
@@ -211,6 +299,7 @@ clawdbot pairing approve telegram <CODE>
 ## Security
 
 - Always set `CLAWDBOT_GATEWAY_TOKEN` before exposing to the internet
+- Use OAuth2 proxy for web UI access control (see above)
 - Use [moltbot-nginx-proxy-docker](https://github.com/nineunderground/moltbot-nginx-proxy-docker) for HTTPS
 - Keep your API keys and tokens secure
 
