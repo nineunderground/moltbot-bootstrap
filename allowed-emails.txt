@@ -1,2 +1,3 @@
-# Add one email per line (GitHub account emails)
-# Example: nineunderground@gmail.com
+# Add one email per line (must match your GitHub account email)
+# Example:
+# PUT-YOUR-EMAIL-HERE

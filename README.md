@@ -200,13 +200,12 @@ GITHUB_ALLOWED_TEAM=your-team-name
 
 Edit `allowed-emails.txt` with one email per line:
 ```
-nineunderground@gmail.com
+PUT-YOUR-EMAIL-HERE
 ```
 
-Then set in `.env`:
-```bash
-OAUTH2_EMAILS_FILE=/etc/oauth2-proxy/allowed-emails.txt
-```
+The file is mounted automatically into the oauth2-proxy container.
+
+> **Important:** Do NOT set `OAUTH2_PROXY_EMAIL_DOMAINS=*` — it overrides the email file and allows everyone.
 
 > **Note:** You can combine options. For example, restrict by username AND email for double verification.
 
