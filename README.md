@@ -165,6 +165,51 @@ Update your reverse proxy (FRP/nginx/Caddy) to forward traffic to **port 4180** 
 your-domain.com → Reverse Proxy (SSL) → :4180 (oauth2-proxy) → :4001 (Moltbot)
 ```
 
+### Access Restriction
+
+By default, **any GitHub user can log in**. Restrict access using one or more of these options:
+
+#### Option 1: Restrict by GitHub username (recommended)
+
+In `.env`:
+```bash
+GITHUB_ALLOWED_USER=nineunderground
+```
+
+Multiple users (comma-separated):
+```bash
+GITHUB_ALLOWED_USER=nineunderground,another-user
+```
+
+#### Option 2: Restrict by GitHub organization
+
+Only members of a specific GitHub org can access:
+```bash
+GITHUB_ALLOWED_ORG=your-org-name
+```
+
+#### Option 3: Restrict by GitHub org + team
+
+Only members of a specific team within an org:
+```bash
+GITHUB_ALLOWED_ORG=your-org-name
+GITHUB_ALLOWED_TEAM=your-team-name
+```
+
+#### Option 4: Restrict by email allowlist
+
+Edit `allowed-emails.txt` with one email per line:
+```
+nineunderground@gmail.com
+```
+
+Then set in `.env`:
+```bash
+OAUTH2_EMAILS_FILE=/etc/oauth2-proxy/allowed-emails.txt
+```
+
+> **Note:** You can combine options. For example, restrict by username AND email for double verification.
+
 ### OAuth2 Proxy Environment Variables
 
 | Variable | Required | Default | Description |
@@ -173,7 +218,10 @@ your-domain.com → Reverse Proxy (SSL) → :4180 (oauth2-proxy) → :4001 (Molt
 | `GITHUB_CLIENT_SECRET` | Yes | — | GitHub OAuth App Client Secret |
 | `OAUTH2_COOKIE_SECRET` | Yes | — | Cookie encryption secret (`openssl rand -hex 16`) |
 | `OAUTH2_REDIRECT_URL` | Yes | — | Must match GitHub callback URL |
-| `GITHUB_ALLOWED_USER` | Yes | — | GitHub username(s) allowed to access |
+| `GITHUB_ALLOWED_USER` | No | — | Restrict by GitHub username(s), comma-separated |
+| `GITHUB_ALLOWED_ORG` | No | — | Restrict by GitHub organization |
+| `GITHUB_ALLOWED_TEAM` | No | — | Restrict by GitHub team (requires org) |
+| `OAUTH2_EMAILS_FILE` | No | — | Path to allowed emails file |
 | `OAUTH2_PROXY_PORT` | No | `4180` | OAuth2 proxy port |
 
 ### Flow
