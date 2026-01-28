@@ -24,6 +24,16 @@ else
     TELEGRAM_ENABLED="false"
 fi
 
+# Determine Telegram DM policy and allowlist
+if [ -n "$TELEGRAM_ALLOWED_USERS" ]; then
+    TELEGRAM_DM_POLICY="allowlist"
+    # Build JSON array from comma-separated user IDs
+    TELEGRAM_ALLOW_FROM=$(echo "$TELEGRAM_ALLOWED_USERS" | sed 's/,/","/g' | sed 's/^/["/' | sed 's/$/"]/')
+else
+    TELEGRAM_DM_POLICY="pairing"
+    TELEGRAM_ALLOW_FROM="[]"
+fi
+
 # Generate config if it doesn't exist or if env vars are set
 if [ ! -f "$CONFIG_FILE" ] || [ -n "$CLAWDBOT_REGENERATE_CONFIG" ]; then
     echo "Generating Moltbot configuration..."
@@ -68,7 +78,8 @@ if [ ! -f "$CONFIG_FILE" ] || [ -n "$CLAWDBOT_REGENERATE_CONFIG" ]; then
     "telegram": {
       "enabled": $TELEGRAM_ENABLED,
       "botToken": "${TELEGRAM_BOT_TOKEN:-}",
-      "dmPolicy": "pairing",
+      "dmPolicy": "$TELEGRAM_DM_POLICY",
+      "allowFrom": $TELEGRAM_ALLOW_FROM,
       "groupPolicy": "allowlist",
       "streamMode": "partial"
     }

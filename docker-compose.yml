@@ -15,6 +15,7 @@ services:
       
       # Optional: Telegram
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS:-}
       
       # Optional: Regenerate config on startup
       - CLAWDBOT_REGENERATE_CONFIG=${CLAWDBOT_REGENERATE_CONFIG:-}
