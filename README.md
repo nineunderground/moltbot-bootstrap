@@ -16,7 +16,7 @@ cp .env.example .env
 nano .env  # Add your ANTHROPIC_API_KEY
 
 # Build and run
-docker compose up -d
+docker-compose up -d
 ```
 
 Your Moltbot is now running at `http://localhost:4001`
@@ -31,7 +31,7 @@ cp .env.example .env
 nano .env
 
 # Build and run with oauth2 profile
-docker compose --profile oauth2 up -d
+docker-compose --profile oauth2 up -d
 ```
 
 Your Moltbot is now at `http://localhost:4180` (behind GitHub login).
@@ -154,7 +154,7 @@ GITHUB_ALLOWED_USER=your-github-username
 
 ```bash
 # Start both Moltbot and oauth2-proxy
-docker compose --profile oauth2 up -d
+docker-compose --profile oauth2 up -d
 ```
 
 ### Step 4: Point your reverse proxy
