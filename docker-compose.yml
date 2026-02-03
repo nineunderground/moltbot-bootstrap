@@ -1,35 +1,34 @@
 services:
-  moltbot:
+  openclaw:
     build: .
-    container_name: moltbot-gateway
+    container_name: openclaw-agent-service
     restart: unless-stopped
     ports:
-      - "${CLAWDBOT_PORT:-4001}:${CLAWDBOT_PORT:-4001}"
+      - "${OPENCLAW_PORT:-4001}:${OPENCLAW_PORT:-4001}"
     environment:
       # Required
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      
+
       # Gateway settings
-      - CLAWDBOT_GATEWAY_PORT=${CLAWDBOT_PORT:-4001}
-      - CLAWDBOT_GATEWAY_TOKEN=${CLAWDBOT_GATEWAY_TOKEN:-}
-      
+      - OPENCLAW_GATEWAY_PORT=${OPENCLAW_PORT:-4001}
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN:-}
+
       # Optional: Telegram
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
       - TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS:-}
-      
+
       # Optional: Regenerate config on startup
-      - CLAWDBOT_REGENERATE_CONFIG=${CLAWDBOT_REGENERATE_CONFIG:-}
+      - OPENCLAW_REGENERATE_CONFIG=${OPENCLAW_REGENERATE_CONFIG:-}
     volumes:
       # Persist workspace and state
-      - clawdbot-data:/root/clawd
-      - clawdbot-config:/root/.clawdbot
-      
+      - openclaw-data:/root/clawd
+      - openclaw-config:/root/.openclaw
       # Optional: Mount custom config
       # - ./config:/config:ro
     networks:
-      - moltbot-net
+      - openclaw-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${CLAWDBOT_PORT:-4001}/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:${OPENCLAW_PORT:-4001}/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -37,7 +36,7 @@ services:
 
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:latest
-    container_name: moltbot-proxy
+    container_name: openclaw-proxy
     restart: unless-stopped
     ports:
       - "${OAUTH2_PROXY_PORT:-4180}:4180"
@@ -60,21 +59,22 @@ services:
       - OAUTH2_PROXY_PASS_ACCESS_TOKEN=true
       - OAUTH2_PROXY_SET_XAUTHREQUEST=true
       - OAUTH2_PROXY_PROXY_WEBSOCKETS=true
-      - OAUTH2_PROXY_UPSTREAMS=http://moltbot-gateway:${CLAWDBOT_PORT:-4001}/
+      - OAUTH2_PROXY_UPSTREAMS=http://openclaw-agent-service:${OPENCLAW_PORT:-4001}/
     volumes:
       - ./allowed-emails.txt:/etc/oauth2-proxy/allowed-emails.txt:ro
     networks:
-      - moltbot-net
+      - openclaw-net
     depends_on:
-      moltbot:
+      openclaw:
         condition: service_healthy
     profiles:
       - oauth2
 
 volumes:
-  clawdbot-data:
-  clawdbot-config:
+  openclaw-data:
+  openclaw-config:
+
 
 networks:
-  moltbot-net:
+  openclaw-net:
     driver: bridge

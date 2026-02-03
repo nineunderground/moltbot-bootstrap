@@ -1,13 +1,13 @@
 #!/bin/bash
 set -e
 
-# Detect config dir (moltbot may use ~/.moltbot or ~/.clawdbot depending on version)
-if [ -d "/root/.moltbot" ] || command -v moltbot &>/dev/null && moltbot --help 2>&1 | grep -q "moltbot"; then
-    CONFIG_DIR="/root/.moltbot"
-    CONFIG_FILE="$CONFIG_DIR/moltbot.json"
+# Detect config dir (openclaw may use ~/.openclaw or ~/.openclaw depending on version)
+if [ -d "/root/.openclaw" ] || command -v openclaw &>/dev/null && openclaw --help 2>&1 | grep -q "openclaw"; then
+    CONFIG_DIR="/root/.openclaw"
+    CONFIG_FILE="$CONFIG_DIR/openclaw.json"
 else
-    CONFIG_DIR="/root/.clawdbot"
-    CONFIG_FILE="$CONFIG_DIR/clawdbot.json"
+    CONFIG_DIR="/root/.openclaw"
+    CONFIG_FILE="$CONFIG_DIR/openclaw.json"
 fi
 WORKSPACE="/root/clawd"
 
@@ -15,7 +15,7 @@ WORKSPACE="/root/clawd"
 mkdir -p "$CONFIG_DIR" "$WORKSPACE/memory"
 
 # Also ensure alternate config dir exists (some versions check both)
-mkdir -p /root/.clawdbot /root/.moltbot
+mkdir -p /root/.openclaw /root/.openclaw
 
 # Determine if Telegram is enabled
 if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
@@ -35,15 +35,15 @@ else
 fi
 
 # Generate config if it doesn't exist or if env vars are set
-if [ ! -f "$CONFIG_FILE" ] || [ -n "$CLAWDBOT_REGENERATE_CONFIG" ]; then
-    echo "Generating Moltbot configuration..."
+if [ ! -f "$CONFIG_FILE" ] || [ -n "$openclaw_REGENERATE_CONFIG" ]; then
+    echo "Generating openclaw configuration..."
     
     # Use provided token or generate one
-    if [ -z "$CLAWDBOT_GATEWAY_TOKEN" ]; then
+    if [ -z "$openclaw_GATEWAY_TOKEN" ]; then
         GATEWAY_TOKEN=$(openssl rand -hex 32)
         TOKEN_GENERATED=1
     else
-        GATEWAY_TOKEN="$CLAWDBOT_GATEWAY_TOKEN"
+        GATEWAY_TOKEN="$openclaw_GATEWAY_TOKEN"
         TOKEN_GENERATED=0
     fi
     
@@ -63,7 +63,7 @@ if [ ! -f "$CONFIG_FILE" ] || [ -n "$CLAWDBOT_REGENERATE_CONFIG" ]; then
     }
   },
   "gateway": {
-    "port": ${CLAWDBOT_GATEWAY_PORT:-4001},
+    "port": ${openclaw_GATEWAY_PORT:-4001},
     "mode": "local",
     "bind": "lan",
     "auth": {
@@ -120,9 +120,9 @@ EOF
 fi
 
 # If a custom config is mounted, use it
-if [ -f "/config/clawdbot.json" ]; then
-    echo "Using mounted config from /config/clawdbot.json"
-    cp /config/clawdbot.json "$CONFIG_FILE"
+if [ -f "/config/openclaw.json" ]; then
+    echo "Using mounted config from /config/openclaw.json"
+    cp /config/openclaw.json "$CONFIG_FILE"
 fi
 
 # Always show config content for debugging
@@ -137,10 +137,10 @@ echo ""
 # Show startup info
 echo ""
 echo "╔═══════════════════════════════════════════╗"
-echo "║         Moltbot Docker Container         ║"
+echo "║         openclaw Docker Container         ║"
 echo "╚═══════════════════════════════════════════╝"
 echo ""
-echo "  Port:      ${CLAWDBOT_GATEWAY_PORT:-4001}"
+echo "  Port:      ${openclaw_GATEWAY_PORT:-4001}"
 echo "  Workspace: $WORKSPACE"
 echo "  Config:    $CONFIG_FILE"
 echo "  Telegram:  $TELEGRAM_ENABLED"

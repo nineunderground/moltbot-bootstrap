@@ -1,6 +1,6 @@
-# Moltbot Bootstrap
+# Openclaw Bootstrap
 
-One-command deployment for [Moltbot](https://github.com/moltbot/moltbot) — on bare metal or Docker.
+One-command deployment for [Openclaw](https://github.com/openclaw/openclaw) — on bare metal or Docker.
 
 ## Docker Deployment (Recommended for NAS/Containers)
 
@@ -8,68 +8,17 @@ One-command deployment for [Moltbot](https://github.com/moltbot/moltbot) — on 
 
 ```bash
 # Clone
-git clone https://github.com/nineunderground/moltbot-bootstrap.git
-cd moltbot-bootstrap
+git clone https://github.com/nineunderground/openclaw-bootstrap.git
+cd openclaw-bootstrap
 
 # Configure
 cp .env.example .env
-nano .env  # Add your ANTHROPIC_API_KEY
+nano .env  # Add your ANTHROPIC_API_KEY and other keys
 
 # Build and run
-docker-compose up -d
-```
-
-Your Moltbot is now running at `http://localhost:4001`
-
-### With OAuth2 Proxy (GitHub Login)
-
-To protect your Moltbot behind GitHub authentication:
-
-```bash
-# Configure (fill in GitHub OAuth + cookie secret)
-cp .env.example .env
-nano .env
-
-# Build and run with oauth2 profile
 docker-compose --profile oauth2 up -d
 ```
 
-Your Moltbot is now at `http://localhost:4180` (behind GitHub login).
-
-See [OAuth2 Proxy Setup](#oauth2-proxy-github-authentication) for full details.
-
-### Docker Build & Run (Manual)
-
-```bash
-# Build the image
-docker build -t moltbot-gateway .
-
-# Run with environment variables
-docker run -d \
-  --name moltbot-gateway \
-  -p 4001:4001 \
-  -e ANTHROPIC_API_KEY="sk-ant-..." \
-  -e CLAWDBOT_GATEWAY_PORT=4001 \
-  -e TELEGRAM_BOT_TOKEN="123456789:ABC..." \
-  -v clawdbot-data:/root/clawd \
-  -v clawdbot-config:/root/.clawdbot \
-  --restart unless-stopped \
-  moltbot-gateway
-```
-
-### Custom Port
-
-```bash
-# Use port 5000 instead
-docker run -d \
-  --name moltbot-gateway \
-  -p 5000:5000 \
-  -e ANTHROPIC_API_KEY="sk-ant-..." \
-  -e CLAWDBOT_GATEWAY_PORT=5000 \
-  -v clawdbot-data:/root/clawd \
-  -v clawdbot-config:/root/.clawdbot \
-  moltbot-gateway
-```
 
 ### Environment Variables
 
@@ -84,13 +33,13 @@ docker run -d \
 ### Persistent Data
 
 The container uses two volumes:
-- `clawdbot-data` → `/root/clawd` (workspace, memory, files)
-- `clawdbot-config` → `/root/.clawdbot` (configuration, state)
+- `openclaw-data` → `/root/clawd` (workspace, memory, files)
+- `openclaw-config` → `/root/.openclaw` (configuration, state)
 
 ### View Logs
 
 ```bash
-docker logs -f moltbot-gateway
+docker logs -f openclaw-agent-service
 ```
 
 ### First Run Token
@@ -98,7 +47,7 @@ docker logs -f moltbot-gateway
 On first run, if you don't provide `CLAWDBOT_GATEWAY_TOKEN`, one is auto-generated and printed to the logs:
 
 ```bash
-docker logs moltbot-gateway | grep "GATEWAY TOKEN"
+docker logs openclaw-agent-service | grep "GATEWAY TOKEN"
 ```
 
 **Save this token!** You'll need it to access the gateway securely.
@@ -107,12 +56,12 @@ docker logs moltbot-gateway | grep "GATEWAY TOKEN"
 
 ## OAuth2 Proxy (GitHub Authentication)
 
-Protect your Moltbot Control UI behind GitHub login using [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/).
+Protect your Openclaw Control UI behind GitHub login using [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/).
 
 ### Architecture
 
 ```
-Internet → Reverse Proxy (SSL) → oauth2-proxy (:4180) → Moltbot (:4001)
+Internet → Reverse Proxy (SSL) → oauth2-proxy (:4180) → Openclaw (:4001)
                                   (GitHub OAuth)          (internal)
 ```
 
@@ -124,7 +73,7 @@ Internet → Reverse Proxy (SSL) → oauth2-proxy (:4180) → Moltbot (:4001)
 
 | Field | Value |
 |-------|-------|
-| Application name | `Moltbot` |
+| Application name | `Openclaw` |
 | Homepage URL | `https://your-domain.com` |
 | Authorization callback URL | `https://your-domain.com/oauth2/callback` |
 
@@ -153,7 +102,7 @@ GITHUB_ALLOWED_USER=your-github-username
 ### Step 3: Run
 
 ```bash
-# Start both Moltbot and oauth2-proxy
+# Start both Openclaw and oauth2-proxy
 docker-compose --profile oauth2 up -d
 ```
 
@@ -162,7 +111,7 @@ docker-compose --profile oauth2 up -d
 Update your reverse proxy (FRP/nginx/Caddy) to forward traffic to **port 4180** (oauth2-proxy) instead of 4001:
 
 ```
-your-domain.com → Reverse Proxy (SSL) → :4180 (oauth2-proxy) → :4001 (Moltbot)
+your-domain.com → Reverse Proxy (SSL) → :4180 (oauth2-proxy) → :4001 (Openclaw)
 ```
 
 ### Access Restriction
@@ -228,14 +177,14 @@ The file is mounted automatically into the oauth2-proxy container.
 1. User opens `https://your-domain.com`
 2. oauth2-proxy redirects to GitHub login
 3. GitHub authenticates → redirects back
-4. oauth2-proxy verifies the GitHub username → forwards traffic to Moltbot
-5. Moltbot gateway token is still required on first browser visit (`?token=...`)
+4. oauth2-proxy verifies the GitHub username → forwards traffic to Openclaw
+5. Openclaw gateway token is still required on first browser visit (`?token=...`)
 
 ### Troubleshooting
 
 **404 after login:**
-- Check oauth2-proxy can reach Moltbot: `docker logs moltbot-proxy`
-- Both containers must be on the same Docker network (`moltbot-net`)
+- Check oauth2-proxy can reach Openclaw: `docker logs openclaw-proxy`
+- Both containers must be on the same Docker network (`openclaw-net`)
 
 **WebSocket issues:**
 - Ensure your reverse proxy passes `Upgrade` and `Connection` headers
@@ -250,8 +199,8 @@ The file is mounted automatically into the oauth2-proxy container.
 ### Quick Start
 
 ```bash
-git clone https://github.com/nineunderground/moltbot-bootstrap.git
-cd moltbot-bootstrap
+git clone https://github.com/nineunderground/openclaw-bootstrap.git
+cd openclaw-bootstrap
 
 # Create config
 cp config.example.json config.json
@@ -282,9 +231,9 @@ sudo ./deploy.sh config.json
 ### What It Does
 
 1. ✅ Installs Node.js 22 (if needed)
-2. ✅ Installs Moltbot globally via official installer
+2. ✅ Installs Openclaw globally via official installer
 3. ✅ Creates workspace directory
-4. ✅ Generates Moltbot config from your JSON
+4. ✅ Generates Openclaw config from your JSON
 5. ✅ Sets up systemd service with auto-restart
 6. ✅ Starts the gateway
 
@@ -296,31 +245,31 @@ sudo ./deploy.sh config.json
 
 ```bash
 # Status
-docker ps | grep moltbot
+docker ps | grep openclaw
 
 # Logs
-docker logs -f moltbot-gateway
+docker logs -f openclaw-agent-service
 
 # Restart
-docker restart moltbot-gateway
+docker restart openclaw-agent-service
 
 # Stop
-docker stop moltbot-gateway
+docker stop openclaw-agent-service
 
 # Shell into container
-docker exec -it moltbot-gateway bash
+docker exec -it openclaw-agent-service bash
 
-# Run clawdbot CLI inside container
-docker exec moltbot-gateway clawdbot status
-docker exec moltbot-gateway clawdbot pairing list telegram
+# Run openclaw CLI inside container
+docker exec openclaw-agent-service openclaw status
+docker exec openclaw-agent-service openclaw pairing list telegram
 ```
 
 ### Bare Metal (systemd)
 
 ```bash
-clawdbot status
-journalctl -u moltbot-gateway -f
-systemctl restart moltbot-gateway
+openclaw status
+journalctl -u openclaw-agent-service -f
+systemctl restart openclaw-agent-service
 ```
 
 ---
@@ -331,14 +280,14 @@ After deployment, DM your Telegram bot. You'll receive a pairing code.
 
 **Docker:**
 ```bash
-docker exec moltbot-gateway clawdbot pairing list telegram
-docker exec moltbot-gateway clawdbot pairing approve telegram <CODE>
+docker exec openclaw-agent-service openclaw pairing list telegram
+docker exec openclaw-agent-service openclaw pairing approve telegram <CODE>
 ```
 
 **Bare metal:**
 ```bash
-clawdbot pairing list telegram
-clawdbot pairing approve telegram <CODE>
+openclaw pairing list telegram
+openclaw pairing approve telegram <CODE>
 ```
 
 ---
@@ -347,16 +296,16 @@ clawdbot pairing approve telegram <CODE>
 
 - Always set `CLAWDBOT_GATEWAY_TOKEN` before exposing to the internet
 - Use OAuth2 proxy for web UI access control (see above)
-- Use [moltbot-nginx-proxy-docker](https://github.com/nineunderground/moltbot-nginx-proxy-docker) for HTTPS
+- Use [openclaw-nginx-proxy-docker](https://github.com/nineunderground/openclaw-nginx-proxy-docker) for HTTPS
 - Keep your API keys and tokens secure
 
 ---
 
 ## Related
 
-- [Moltbot](https://github.com/moltbot/moltbot) — The AI assistant platform
-- [moltbot-nginx-proxy-docker](https://github.com/nineunderground/moltbot-nginx-proxy-docker) — HTTPS reverse proxy
-- [Moltbot Docs](https://docs.molt.bot) — Official documentation
+- [Openclaw](https://github.com/openclaw/openclaw) — The AI assistant platform
+- [openclaw-nginx-proxy-docker](https://github.com/nineunderground/openclaw-nginx-proxy-docker) — HTTPS reverse proxy
+- [Openclaw Docs](https://docs.molt.bot) — Official documentation
 
 ## License
 

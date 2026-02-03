@@ -1,7 +1,7 @@
 FROM ubuntu:24.04
 
 LABEL maintainer="nineunderground"
-LABEL description="Moltbot Gateway in Docker"
+LABEL description="openclaw Gateway in Docker"
 
 # Prevent interactive prompts during install
 ENV DEBIAN_FRONTEND=noninteractive
@@ -20,17 +20,17 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Moltbot via official installer (handles package name mapping)
-RUN curl -fsSL https://molt.bot/install.sh | bash -s -- --no-onboard --no-prompt
+# Install openclaw via official installer (handles package name mapping)
+RUN curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-onboard --no-prompt
 
 # Create directories
-RUN mkdir -p /root/.clawdbot /root/clawd/memory
+RUN mkdir -p /root/.openclaw /root/clawd/memory
 
 # Set workspace
 WORKDIR /root/clawd
 
 # Default port (can be overridden)
-ENV CLAWDBOT_GATEWAY_PORT=4001
+ENV openclaw_GATEWAY_PORT=4001
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
@@ -41,12 +41,12 @@ EXPOSE 4001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:${CLAWDBOT_GATEWAY_PORT}/health || exit 1
+    CMD curl -f http://localhost:${openclaw_GATEWAY_PORT}/health || exit 1
 
-# Ensure moltbot alias exists (binary may be clawdbot or moltbot depending on version)
-RUN command -v moltbot >/dev/null 2>&1 || \
-    (command -v clawdbot >/dev/null 2>&1 && ln -sf "$(which clawdbot)" /usr/local/bin/moltbot) || true
+# Ensure openclaw alias exists (binary may be openclaw or openclaw depending on version)
+RUN command -v openclaw >/dev/null 2>&1 || \
+    (command -v openclaw >/dev/null 2>&1 && ln -sf "$(which openclaw)" /usr/local/bin/openclaw) || true
 
 # Run entrypoint
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["moltbot", "gateway"]
+CMD ["openclaw", "gateway"]
