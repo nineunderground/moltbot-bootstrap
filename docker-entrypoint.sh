@@ -34,6 +34,13 @@ else
     TELEGRAM_ALLOW_FROM="[]"
 fi
 
+# Determine if Ollama is enabled
+if [ -n "$OLLAMA_BASE_URL" ]; then
+    OLLAMA_ENABLED="true"
+else
+    OLLAMA_ENABLED="false"
+fi
+
 # Generate config if it doesn't exist or if env vars are set
 if [ ! -f "$CONFIG_FILE" ] || [ -n "$openclaw_REGENERATE_CONFIG" ]; then
     echo "Generating openclaw configuration..."
@@ -97,7 +104,18 @@ if [ ! -f "$CONFIG_FILE" ] || [ -n "$openclaw_REGENERATE_CONFIG" ]; then
   "commands": {
     "native": "auto",
     "nativeSkills": "auto"
-  }
+  }$(if [ "$OLLAMA_ENABLED" = "true" ]; then echo ',
+  "models": {
+    "providers": {
+      "ollama": {
+        "baseUrl": "'"$OLLAMA_BASE_URL"'"
+      }
+    },
+    "aliases": {
+      "kimi": "ollama/kimi-k2.5:cloud",
+      "qwen": "ollama/qwen3-coder-next"
+    }
+  }'; fi)
 }
 EOF
 
@@ -144,6 +162,7 @@ echo "  Port:      ${openclaw_GATEWAY_PORT:-4001}"
 echo "  Workspace: $WORKSPACE"
 echo "  Config:    $CONFIG_FILE"
 echo "  Telegram:  $TELEGRAM_ENABLED"
+echo "  Ollama:    $OLLAMA_ENABLED"
 echo ""
 
 # Execute the command

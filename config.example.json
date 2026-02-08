@@ -12,5 +12,17 @@
   
   "anthropic": {
     "apiKey": "sk-ant-api03-..."
+  },
+  
+  "models": {
+    "providers": {
+      "ollama": {
+        "baseUrl": "http://localhost:11434/v1"
+      }
+    },
+    "aliases": {
+      "kimi": "ollama/kimi-k2.5:cloud",
+      "qwen": "ollama/qwen3-coder-next"
+    }
   }
 }

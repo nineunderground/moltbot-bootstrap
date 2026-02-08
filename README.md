@@ -28,6 +28,7 @@ docker-compose --profile oauth2 up -d
 | `CLAWDBOT_GATEWAY_PORT` | No | `4001` | Gateway port |
 | `CLAWDBOT_GATEWAY_TOKEN` | No | auto-generated | Auth token for secure access |
 | `TELEGRAM_BOT_TOKEN` | No | — | Telegram bot token from @BotFather |
+| `OLLAMA_BASE_URL` | No | — | Ollama API URL (e.g., `http://192.168.1.100:11434/v1`) |
 | `CLAWDBOT_REGENERATE_CONFIG` | No | — | Set to `1` to regenerate config on restart |
 
 ### Persistent Data
@@ -35,6 +36,31 @@ docker-compose --profile oauth2 up -d
 The container uses two volumes:
 - `openclaw-data` → `/root/clawd` (workspace, memory, files)
 - `openclaw-config` → `/root/.openclaw` (configuration, state)
+
+### Local LLM with Ollama
+
+Openclaw supports local LLMs via [Ollama](https://ollama.ai/). To use:
+
+1. **Install Ollama** on a machine with a good GPU (or CPU for smaller models)
+2. **Pull models** you want to use:
+   ```bash
+   ollama pull kimi-k2.5:cloud
+   ollama pull qwen3-coder-next
+   ```
+3. **Update `.env`** with your Ollama URL:
+   ```bash
+   OLLAMA_BASE_URL=http://your-ollama-host:11434/v1
+   ```
+4. **Switch models** via Telegram:
+   ```
+   /model kimi      # Use kimi-k2.5:cloud
+   /model qwen      # Use qwen3-coder-next
+   /model default   # Back to Claude
+   ```
+
+The `config.example.json` includes pre-configured aliases for these models.
+
+> **Note:** Ollama must be accessible from the Docker container. Use the host IP, not `localhost`, if running on a different machine.
 
 ### View Logs
 
